@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse, time
-import pandas as pd, requests
+import pandas as pd
 from bs4 import BeautifulSoup, Comment
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -8,21 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-DESIRED = ['Player','Nation','Squad','Pos','Age','MP','Starts','Min','Gls','Ast','PK','CrdY','CrdR','Expected_xG','xAG']
-
-
-def requests_table(url):
-    try:
-        r = requests.get(url, headers={'User-Agent':'Mozilla/5.0'}, timeout=10)
-        r.raise_for_status()
-        s = BeautifulSoup(r.text, 'lxml')
-        for c in s.find_all(string=lambda t: isinstance(t, Comment)):
-            if '<table' in c and ('stats_standard' in c or 'stats_table' in c):
-                return pd.read_html(str(c))[0]
-        t = s.find('table', id='stats_standard') or s.find('table', class_='stats_table')
-        return pd.read_html(str(t))[0] if t else None
-    except Exception:
-        return None
+DESIRED = ['Player','Nation','Squad','Pos','Age','MP','Starts','Min','Gls','Ast','PK','CrdY','CrdR','Expected_xG','xA']
 
 
 def selenium_table(url, headless=True):
@@ -88,13 +74,22 @@ def normalize_age(df):
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--out',default='players_primeira_liga.csv'); p.add_argument('--headless',action='store_true')
     args=p.parse_args(); url='https://fbref.com/en/comps/32/stats/Primeira-Liga-Stats'
-    df = requests_table(url) or selenium_table(url, headless=args.headless)
+    df = selenium_table(url, headless=args.headless)
     if df is None: raise SystemExit('No table')
-    if 'Player' in df.columns: df=df[df['Player']!='Player']
+    # clean possible repeated header rows that appear in the table (fbref repeats headers)
+    # normalize Player column early so we can reliably filter rows like 'Player' or empty values
+    if 'Player' in df.columns:
+        df['Player'] = df['Player'].astype(str).str.strip()
+        df = df[~df['Player'].str.lower().eq('player')]
     df=df.dropna(axis=1, how='all')
     df=flatten(df)
     out=pick(df, DESIRED)
     out=normalize_age(out)
+    # final safety: remove any leftover header-like rows or empty player names after column picking
+    if 'Player' in out.columns:
+        out['Player'] = out['Player'].astype(str).str.strip()
+        out = out[~out['Player'].str.lower().eq('player')]
+        out = out[out['Player'].astype(bool)]
     out.to_csv(args.out, index=False, encoding='utf-8-sig')
     print('Wrote', args.out)
 
