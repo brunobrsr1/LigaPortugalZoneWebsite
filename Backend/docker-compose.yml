@@ -1,0 +1,17 @@
+services:
+  db:
+    container_name: postgres-spring
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: brunobrsr
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - db:/var/lib/postgresql
+      - ./data:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  db:
