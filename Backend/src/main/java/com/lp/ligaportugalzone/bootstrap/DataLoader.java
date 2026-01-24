@@ -23,13 +23,16 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (playerRepository.count() == 0) {
-            System.out.println("--- BASE DE DADOS VAZIA. A INICIAR IMPORTAÇÃO DO CSV ---");
-            loadCsvData();
-            System.out.println("--- IMPORTAÇÃO CONCLUÍDA COM SUCESSO ---");
-        } else {
-            System.out.println("--- A Base de Dados já contém dados. Importação ignorada. ---");
+        // 1. IMPORTANTE: Limpar dados antigos que estavam errados
+        // Como o Render não apaga a BD sozinho, forçamos a limpeza aqui
+        if (playerRepository.count() > 0) {
+            System.out.println("--- LIMPANDO DADOS ANTIGOS/INCORRETOS ---");
+            playerRepository.deleteAll();
         }
+
+        System.out.println("--- A INICIAR IMPORTAÇÃO DO CSV (MODO ROBUSTO) ---");
+        loadCsvData();
+        System.out.println("--- IMPORTAÇÃO CONCLUÍDA ---");
     }
 
     private void loadCsvData() {
@@ -47,22 +50,25 @@ public class DataLoader implements CommandLineRunner {
                     continue;
                 }
 
-
-                String[] columns = line.split(",");
+                // --- A CORREÇÃO MÁGICA ---
+                // Em vez de split(","), usamos esta Regex.
+                // Ela diz: "Corta pela vírgula, MAS SÓ se não estiver dentro de aspas"
+                String[] columns = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
 
                 Player player = new Player();
 
-
-                player.setName(columns[0].trim());
-                player.setNation(columns[1].trim());
-                player.setTeam(columns[2].trim());
-                player.setPosition(columns[3].trim());
+                // Função auxiliar 'clean' remove aspas extras que possam vir do CSV
+                player.setName(clean(columns[0]));
+                player.setNation(clean(columns[1]));
+                player.setTeam(clean(columns[2]));
+                player.setPosition(clean(columns[3]));
 
                 player.setAge(parseInt(columns[4]));
                 player.setMp(parseInt(columns[5]));
                 player.setStarts(parseInt(columns[6]));
 
-                String minClean = columns[7].replace(",", "").trim();
+                // Removemos virgulas dos numeros (Ex: "1,200" -> "1200")
+                String minClean = clean(columns[7]).replace(",", "");
                 player.setMin(parseInt(minClean));
 
                 player.setGls(parseInt(columns[8]));
@@ -71,7 +77,6 @@ public class DataLoader implements CommandLineRunner {
                 player.setCrdY(parseInt(columns[11]));
                 player.setCrdR(parseInt(columns[12]));
 
-                // Estatísticas Avançadas (Double)
                 player.setXg(parseDouble(columns[13]));
                 player.setXag(parseDouble(columns[14]));
 
@@ -82,23 +87,31 @@ public class DataLoader implements CommandLineRunner {
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("ERRO AO CARREGAR CSV: " + e.getMessage());
+            System.err.println("ERRO CRÍTICO NO CSV: " + e.getMessage());
         }
     }
 
+    // Remove aspas duplas e espaços em branco
+    private String clean(String input) {
+        if (input == null) return "";
+        return input.replace("\"", "").trim();
+    }
+
     private Integer parseInt(String value) {
-        if (value == null || value.trim().isEmpty()) return 0;
+        String cleaned = clean(value);
+        if (cleaned.isEmpty()) return 0;
         try {
-            return Integer.parseInt(value.trim());
+            return Integer.parseInt(cleaned);
         } catch (NumberFormatException e) {
             return 0;
         }
     }
 
     private Double parseDouble(String value) {
-        if (value == null || value.trim().isEmpty()) return 0.0;
+        String cleaned = clean(value);
+        if (cleaned.isEmpty()) return 0.0;
         try {
-            return Double.parseDouble(value.trim());
+            return Double.parseDouble(cleaned);
         } catch (NumberFormatException e) {
             return 0.0;
         }
