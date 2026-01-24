@@ -1,0 +1,30 @@
+# ---- Global ignores for the whole project ----
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.log
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Node / frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env.local
+Frontend/.env.development.local
+Frontend/.env.test.local
+Frontend/.env.production.local
+
+
+# Java / Maven backend
+Backend/target/
+Backend/.mvn/wrapper/maven-wrapper.jar
+
+# Misc
+*.swp
+*.swo
+
+
