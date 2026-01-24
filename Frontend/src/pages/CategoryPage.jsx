@@ -14,7 +14,7 @@ function CategoryPage({ type }) {
         setSelectedCategory(null);
         setFilterTerm(''); // Reset filter term on category change
 
-        fetch('http://localhost:8080/api/v1/players/data')
+        fetch(`${import.meta.env.VITE_API_URL}/api/v1/players/data`)
             .then(res => res.json())
             .then(data => {
                 setPlayers(data);

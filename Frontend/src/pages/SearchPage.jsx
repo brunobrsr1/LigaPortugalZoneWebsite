@@ -8,7 +8,7 @@ function SearchPage() {
     const [hasSearched, setHasSearched] = useState(false);
 
     const handleSearch = () => {
-        fetch(`http://localhost:8080/api/v1/players/data?name=${query}`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/v1/players/data?name=${query}`)
             .then(res => res.json())
             .then(data => {
                 setPlayers(data);

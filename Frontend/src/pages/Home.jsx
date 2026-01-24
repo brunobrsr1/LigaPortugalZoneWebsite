@@ -4,8 +4,8 @@ import { Shield, Globe, User, Search } from 'lucide-react';
 function Home() {
     return (
         <div className="hero-section">
-            <h1 className="hero-title">Liga Portugal Zone</h1>
-            <p className="hero-subtitle">Estatísticas essenciais. Design puro.</p>
+            <h1 className="hero-title">Bem-vindo à Liga Portugal Zone!</h1>
+            <p className="hero-subtitle">A tua casa para tudo o relacionado à Liga Portugal.</p>
 
             <div className="stats-grid">
                 <Link to="/teams" style={{ textDecoration: 'none' }}>
