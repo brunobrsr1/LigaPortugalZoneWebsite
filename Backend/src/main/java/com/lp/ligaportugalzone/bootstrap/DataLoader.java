@@ -99,6 +99,13 @@ public class DataLoader implements CommandLineRunner {
 
     private Integer parseInt(String value) {
         String cleaned = clean(value);
+
+        if (cleaned.contains("-")) {
+            cleaned = cleaned.split("-")[0];
+        }
+
+        cleaned = cleaned.replace(",", "").replace(".", "");
+
         if (cleaned.isEmpty()) return 0;
         try {
             return Integer.parseInt(cleaned);
