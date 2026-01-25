@@ -1,11 +1,10 @@
 # Liga Portugal Zone
 
-`![Screenshot](Frontend/public/home_page_screenshot.png)`
-
-![Project Logo](Frontend/public/logo.png)
+![Screenshot](Frontend/public/home_page_screenshot.png)
 
 > A full-stack web application that provides real-time statistics and insights for the Portuguese First League (Liga Portugal). Built with **Spring Boot**, **React**, and **PostgreSQL**.
-[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://liga-portugal-zone.vercel.app/)
+
+[![Demo](https://img.shields.io/badge/WEBSITE-VISIT_APP-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://o-teu-link-aqui.com)
 
 ---
 
