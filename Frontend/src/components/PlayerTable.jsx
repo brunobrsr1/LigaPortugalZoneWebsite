@@ -14,14 +14,14 @@ function PlayerTable({ players }) {
                     <th title="Posição">Pos.</th>
                     <th title="Idade" className="center-text">Idade</th>
 
-                    <th title="Jogos Realizados" className="center-text">MP</th>
+                    <th title="Jogos Realizados" className="center-text">Jogos</th>
                     <th title="Jogos como Titular" className="center-text">Titular</th>
                     <th title="Minutos Jogados" className="center-text">Min</th>
 
                     <th title="Golos Marcados" className="center-text">Golos</th>
                     <th title="Assistências" className="center-text">Ast</th>
-                    <th title="Golos Esperados (Qualidade das oportunidades)" className="center-text">xG</th>
-                    <th title="Assistências Esperadas" className="center-text">xA</th>
+                    <th title="Golos marcados por 90 minutos" className="center-text">Golos/90</th>
+                    <th title="Assistências por cada 90 minutos" className="center-text">Ast/90</th>
 
                     <th title="Cartões Amarelos" className="center-text">🟨</th>
                     <th title="Cartões Vermelhos" className="center-text">🟥</th>
@@ -52,11 +52,12 @@ function PlayerTable({ players }) {
                             {player.ast}
                         </td>
 
-                        <td className="center-text advanced-stat" title={`Golos: ${player.gls} vs xG: ${player.xg}`}>
-                            {player.xg?.toFixed(2)}
+                        <td className="center-text advanced-stat" title={`Golos: ${player.gls} | Média: ${player.goalsPer90}/90min`}>
+                            {player.goalsPer90?.toFixed(2)}
                         </td>
-                        <td className="center-text advanced-stat">
-                            {player.xag?.toFixed(2)}
+
+                        <td className="center-text advanced-stat" title={`Assistências: ${player.ast} | Média: ${player.assistsPer90}/90min`}>
+                            {player.assistsPer90?.toFixed(2)}
                         </td>
 
                         <td className={`center-text ${player.crdY > 4 ? 'text-warn' : ''}`}>{player.crdY}</td>

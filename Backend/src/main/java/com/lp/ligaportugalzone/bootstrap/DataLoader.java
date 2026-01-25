@@ -23,16 +23,13 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. IMPORTANTE: Limpar dados antigos que estavam errados
-        // Como o Render não apaga a BD sozinho, forçamos a limpeza aqui
-        if (playerRepository.count() > 0) {
-            System.out.println("--- LIMPANDO DADOS ANTIGOS/INCORRETOS ---");
-            playerRepository.deleteAll();
+        if (playerRepository.count() == 0) {
+            System.out.println("--- BASE DE DADOS VAZIA. A CARREGAR CSV... ---");
+            loadCsvData();
+            System.out.println("--- IMPORTAÇÃO CONCLUÍDA ---");
+        } else {
+            System.out.println("--- DADOS JÁ EXISTEM. A SALTAR IMPORTAÇÃO PARA ARRANQUE RÁPIDO. ---");
         }
-
-        System.out.println("--- A INICIAR IMPORTAÇÃO DO CSV (MODO ROBUSTO) ---");
-        loadCsvData();
-        System.out.println("--- IMPORTAÇÃO CONCLUÍDA ---");
     }
 
     private void loadCsvData() {
@@ -50,14 +47,10 @@ public class DataLoader implements CommandLineRunner {
                     continue;
                 }
 
-                // --- A CORREÇÃO MÁGICA ---
-                // Em vez de split(","), usamos esta Regex.
-                // Ela diz: "Corta pela vírgula, MAS SÓ se não estiver dentro de aspas"
                 String[] columns = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
 
                 Player player = new Player();
 
-                // Função auxiliar 'clean' remove aspas extras que possam vir do CSV
                 player.setName(clean(columns[0]));
                 player.setNation(clean(columns[1]));
                 player.setTeam(clean(columns[2]));
@@ -67,7 +60,6 @@ public class DataLoader implements CommandLineRunner {
                 player.setMp(parseInt(columns[5]));
                 player.setStarts(parseInt(columns[6]));
 
-                // Removemos virgulas dos numeros (Ex: "1,200" -> "1200")
                 String minClean = clean(columns[7]).replace(",", "");
                 player.setMin(parseInt(minClean));
 
@@ -77,8 +69,8 @@ public class DataLoader implements CommandLineRunner {
                 player.setCrdY(parseInt(columns[11]));
                 player.setCrdR(parseInt(columns[12]));
 
-                player.setXg(parseDouble(columns[13]));
-                player.setXag(parseDouble(columns[14]));
+                player.setGoalsPer90(parseDouble(columns[13]));
+                player.setAssistsPer90(parseDouble(columns[14]));
 
                 players.add(player);
             }
@@ -91,7 +83,6 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
-    // Remove aspas duplas e espaços em branco
     private String clean(String input) {
         if (input == null) return "";
         return input.replace("\"", "").trim();

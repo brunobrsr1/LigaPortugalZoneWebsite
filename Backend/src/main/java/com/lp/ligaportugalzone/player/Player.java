@@ -53,8 +53,8 @@ public class Player {
     private Integer crdR;
 
     @Column(name = "expected_goals")
-    private Double xg;
+    private Double goalsPer90;
 
     @Column(name = "expected_assists")
-    private Double xag;
+    private Double assistsPer90;
 }
