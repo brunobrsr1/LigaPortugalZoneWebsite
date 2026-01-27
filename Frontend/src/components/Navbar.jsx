@@ -8,7 +8,6 @@ function Navbar() {
     return (
         <nav className="navbar">
             <Link to="/" className="nav-logo-link">
-                {/* AQUI ESTÁ A MUDANÇA: Usamos a imagem em vez do ícone */}
                 <img src="/logo.png" alt="Logo LigaZone" className="navbar-logo-img" />
 
                 <span className="nav-logo">LigaZone</span>
