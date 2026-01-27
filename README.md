@@ -38,6 +38,8 @@
 * **Robust Import:** Java `DataLoader` that automatically cleans and imports CSV data on startup, handling edge cases (formatting errors, regex parsing).
 * **Responsive Design:** Fully optimized for Desktop and Mobile.
 
+---
+
 ## How to Run Locally
 This command builds the images (Backend & Frontend) and starts the Database.
 ```bash
