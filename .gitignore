@@ -1,4 +1,5 @@
 # ---- Global ignores for the whole project ----
+.env
 
 # OS / editor junk
 .DS_Store

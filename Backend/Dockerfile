@@ -20,8 +20,5 @@ WORKDIR /app
 COPY --from=build /app/target/liga-portugal-zone-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
-ENV DB_URL=jdbc:postgresql://db:5432/mydb
-ENV DB_USERNAME=brunobrsr
-ENV DB_PASSWORD=password
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
