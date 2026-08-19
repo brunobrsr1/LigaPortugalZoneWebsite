@@ -16,6 +16,9 @@ import static org.mockito.Mockito.verify;
 /**
  * Unit test for the filtering rules. The repository is a mock returning a fixed list, so the
  * assertions are about the filters only.
+ *
+ * <p>The fixtures are entities because that is what the repository returns; the assertions are
+ * on {@link PlayerResponse} because that is what the service now hands back.
  */
 @ExtendWith(MockitoExtension.class)
 class PlayerServiceTest {
@@ -40,7 +43,8 @@ class PlayerServiceTest {
         givenPlayers();
 
         assertThat(playerService.findPlayers(null, null, null, null))
-                .containsExactly(PAVLIDIS, ZALAZAR, ABBEY, SOARES);
+                .extracting(PlayerResponse::name)
+                .containsExactly("Vangelis Pavlidis", "Rodrigo Zalazar", "Nelson Abbey", "Samuel Soares");
     }
 
     @Test
@@ -48,7 +52,8 @@ class PlayerServiceTest {
         givenPlayers();
 
         assertThat(playerService.findPlayers("benfica", null, null, null))
-                .containsExactly(PAVLIDIS, SOARES);
+                .extracting(PlayerResponse::name)
+                .containsExactly("Vangelis Pavlidis", "Samuel Soares");
     }
 
     @Test
@@ -58,7 +63,8 @@ class PlayerServiceTest {
         // Nation is stored as "gr GRE", so the filter has to match the suffix.
         // CLAUDE.md tracks this as "nation filtering uses endsWith".
         assertThat(playerService.findPlayers(null, "gre", null, null))
-                .containsExactly(PAVLIDIS);
+                .extracting(PlayerResponse::name)
+                .containsExactly("Vangelis Pavlidis");
     }
 
     @Test
@@ -68,7 +74,8 @@ class PlayerServiceTest {
         // Zalazar is "MF,FW" and is therefore NOT returned for "FW", even though the frontend
         // treats him as a forward. Known inconsistency to resolve in roadmap step 3.
         assertThat(playerService.findPlayers(null, null, "FW", null))
-                .containsExactly(PAVLIDIS);
+                .extracting(PlayerResponse::name)
+                .containsExactly("Vangelis Pavlidis");
     }
 
     @Test
@@ -76,7 +83,8 @@ class PlayerServiceTest {
         givenPlayers();
 
         assertThat(playerService.findPlayers(null, null, null, "zala"))
-                .containsExactly(ZALAZAR);
+                .extracting(PlayerResponse::name)
+                .containsExactly("Rodrigo Zalazar");
     }
 
     @Test
@@ -84,7 +92,8 @@ class PlayerServiceTest {
         givenPlayers();
 
         assertThat(playerService.findPlayers("Benfica", "POR", "GK", "Soares"))
-                .containsExactly(SOARES);
+                .extracting(PlayerResponse::name)
+                .containsExactly("Samuel Soares");
     }
 
     @Test

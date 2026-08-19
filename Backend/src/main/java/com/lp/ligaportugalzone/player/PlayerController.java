@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,7 +19,7 @@ public class PlayerController {
     private final PlayerService playerService;
 
     @GetMapping("/data")
-    public ResponseEntity<List<Player>> getFilterPlayers(
+    public ResponseEntity<List<PlayerResponse>> getFilterPlayers(
             @RequestParam(required = false) String team,
             @RequestParam(required = false) String nation,
             @RequestParam(required = false) String position,
@@ -30,8 +29,7 @@ public class PlayerController {
             team = SlugUtils.fromSlug(team);
         }
 
-        List<Player> players = playerService.findPlayers(team, nation, position, name);
+        List<PlayerResponse> players = playerService.findPlayers(team, nation, position, name);
         return ResponseEntity.ok(players);
-
     }
 }

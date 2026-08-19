@@ -35,7 +35,7 @@ class PlayerControllerTest {
     @Test
     void serialisesPlayersAsJson() throws Exception {
         given(playerService.findPlayers(null, null, null, null))
-                .willReturn(List.of(player("Vangelis Pavlidis", "gr GRE", "Benfica", "FW")));
+                .willReturn(List.of(PlayerResponse.from(player("Vangelis Pavlidis", "gr GRE", "Benfica", "FW"))));
 
         mockMvc.perform(get("/api/v1/players/data"))
                 .andExpect(status().isOk())
@@ -43,8 +43,10 @@ class PlayerControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name").value("Vangelis Pavlidis"))
                 .andExpect(jsonPath("$[0].team").value("Benfica"))
-                // The JPA entity is serialised directly, so the JSON keys are the field names.
-                // CLAUDE.md tracks this as "the JPA entity is the API contract".
+                // PlayerResponse now decides the JSON keys, not the entity. They are still the
+                // entity's old field names on purpose: introducing the DTO changed nothing on
+                // the wire, so these assertions carried over untouched. Renaming them is a
+                // separate change, made together with the frontend.
                 .andExpect(jsonPath("$[0].gls").value(3))
                 .andExpect(jsonPath("$[0].crdY").value(2))
                 .andExpect(jsonPath("$[0].goalsPer90").value(0.39));
