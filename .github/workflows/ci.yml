@@ -1,0 +1,96 @@
+# Continuous integration: every push and every pull request to main is built and tested on a clean machine
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# The workflow only reads the repository; it never pushes anything back.
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run that is still in flight.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          # Restores ~/.m2 between runs; without it every run re-downloads every dependency.
+          cache: maven
+
+      # `verify` runs the unit tests (surefire, *Test) and then the integration tests
+      # (failsafe, *IT). The integration tests start PostgreSQL through Testcontainers,
+      # which works because the ubuntu runner already has a Docker daemon.
+      - name: Build and test
+        working-directory: Backend
+        run: ./mvnw -B verify
+
+      # `if: always()` so the report is still published when the tests fail — that is
+      # exactly when it is worth reading.
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: |
+            Backend/target/surefire-reports
+            Backend/target/failsafe-reports
+            Backend/target/site/jacoco
+          if-no-files-found: warn
+
+  frontend:
+    name: Frontend (lint + build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+
+      # `npm ci` installs exactly what package-lock.json pins, unlike `npm install`
+      # which is allowed to update it.
+      - name: Install dependencies
+        working-directory: Frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: Frontend
+        run: npm run lint
+
+      - name: Build
+        working-directory: Frontend
+        run: npm run build
+
+  docker:
+    name: Docker images
+    runs-on: ubuntu-latest
+    # Only worth building images once the code itself is known to be good.
+    needs: [backend, frontend]
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Build the backend image
+        run: docker build -t liga-portugal-zone-backend:ci Backend
+
+      - name: Build the frontend image
+        run: docker build -t liga-portugal-zone-frontend:ci Frontend

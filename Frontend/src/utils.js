@@ -96,7 +96,7 @@ export const formatNation = (rawNation) => {
     try {
         const regionNames = new Intl.DisplayNames(['pt'], { type: 'region' });
         return regionNames.of(code.substring(0, 2));
-    } catch (e) {
+    } catch {
         return code;
     }
 };

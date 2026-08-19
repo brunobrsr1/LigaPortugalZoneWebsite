@@ -12,9 +12,9 @@ function App() {
             <div className="container">
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/teams" element={<CategoryPage type="team" />} />
-                    <Route path="/nations" element={<CategoryPage type="nation" />} />
-                    <Route path="/positions" element={<CategoryPage type="position" />} />
+                    <Route path="/teams" element={<CategoryPage key="team" type="team" />} />
+                    <Route path="/nations" element={<CategoryPage key="nation" type="nation" />} />
+                    <Route path="/positions" element={<CategoryPage key="position" type="position" />} />
                     <Route path="/search" element={<SearchPage />} />
                 </Routes>
             </div>

@@ -10,10 +10,9 @@ function CategoryPage({ type }) {
 
     const [filterTerm, setFilterTerm] = useState('');
 
+    // State is reset by remounting on route change (see the `key` prop in App.jsx),
+    // so this effect only fetches.
     useEffect(() => {
-        setSelectedCategory(null);
-        setFilterTerm(''); // Reset filter term on category change
-
         fetch(`${import.meta.env.VITE_API_URL}/api/v1/players/data`)
             .then(res => res.json())
             .then(data => {

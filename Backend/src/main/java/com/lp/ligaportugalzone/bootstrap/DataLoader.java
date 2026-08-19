@@ -2,116 +2,49 @@ package com.lp.ligaportugalzone.bootstrap;
 
 import com.lp.ligaportugalzone.player.Player;
 import com.lp.ligaportugalzone.player.PlayerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.List;
 
+/**
+ * Seeds {@code player_data} from the bundled CSV on startup, but only when the table is empty.
+ */
 @Component
 public class DataLoader implements CommandLineRunner {
 
-    private final PlayerRepository playerRepository;
+    private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
 
-    public DataLoader(PlayerRepository playerRepository) {
+    static final String CSV_RESOURCE = "players_primeira_liga.csv";
+
+    private final PlayerRepository playerRepository;
+    private final PlayerCsvParser csvParser;
+
+    public DataLoader(PlayerRepository playerRepository, PlayerCsvParser csvParser) {
         this.playerRepository = playerRepository;
+        this.csvParser = csvParser;
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        if (playerRepository.count() == 0) {
-            System.out.println("--- BASE DE DADOS VAZIA. A CARREGAR CSV... ---");
-            loadCsvData();
-            System.out.println("--- IMPORTAÇÃO CONCLUÍDA ---");
-        } else {
-            System.out.println("--- DADOS JÁ EXISTEM. A SALTAR IMPORTAÇÃO PARA ARRANQUE RÁPIDO. ---");
+    public void run(String... args) {
+        if (playerRepository.count() > 0) {
+            log.info("Player table already populated, skipping CSV import.");
+            return;
         }
-    }
 
-    private void loadCsvData() {
-        try {
-            ClassPathResource resource = new ClassPathResource("players_primeira_liga.csv");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-
-            String line;
-            boolean isHeader = true;
-            List<Player> players = new ArrayList<>();
-
-            while ((line = reader.readLine()) != null) {
-                if (isHeader) {
-                    isHeader = false;
-                    continue;
-                }
-
-                String[] columns = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-
-                Player player = new Player();
-
-                player.setName(clean(columns[0]));
-                player.setNation(clean(columns[1]));
-                player.setTeam(clean(columns[2]));
-                player.setPosition(clean(columns[3]));
-
-                player.setAge(parseInt(columns[4]));
-                player.setMp(parseInt(columns[5]));
-                player.setStarts(parseInt(columns[6]));
-
-                String minClean = clean(columns[7]).replace(",", "");
-                player.setMin(parseInt(minClean));
-
-                player.setGls(parseInt(columns[8]));
-                player.setAst(parseInt(columns[9]));
-                player.setPk(parseInt(columns[10]));
-                player.setCrdY(parseInt(columns[11]));
-                player.setCrdR(parseInt(columns[12]));
-
-                player.setGoalsPer90(parseDouble(columns[13]));
-                player.setAssistsPer90(parseDouble(columns[14]));
-
-                players.add(player);
-            }
-
+        log.info("Player table is empty, importing {}", CSV_RESOURCE);
+        try (InputStream inputStream = new ClassPathResource(CSV_RESOURCE).getInputStream()) {
+            List<Player> players = csvParser.parse(inputStream);
             playerRepository.saveAll(players);
-
+            log.info("Imported {} players from {}", players.size(), CSV_RESOURCE);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("ERRO CRÍTICO NO CSV: " + e.getMessage());
-        }
-    }
-
-    private String clean(String input) {
-        if (input == null) return "";
-        return input.replace("\"", "").trim();
-    }
-
-    private Integer parseInt(String value) {
-        String cleaned = clean(value);
-
-        if (cleaned.contains("-")) {
-            cleaned = cleaned.split("-")[0];
-        }
-
-        cleaned = cleaned.replace(",", "").replace(".", "");
-
-        if (cleaned.isEmpty()) return 0;
-        try {
-            return Integer.parseInt(cleaned);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    private Double parseDouble(String value) {
-        String cleaned = clean(value);
-        if (cleaned.isEmpty()) return 0.0;
-        try {
-            return Double.parseDouble(cleaned);
-        } catch (NumberFormatException e) {
-            return 0.0;
+            // TODO: startup should fail instead of leaving an empty table. See CLAUDE.md,
+            // "Errors are swallowed" — fixed together with the scraper in roadmap step 4.
+            log.error("Failed to import {}", CSV_RESOURCE, e);
         }
     }
 }
