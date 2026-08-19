@@ -80,6 +80,29 @@ jobs:
         working-directory: Frontend
         run: npm run build
 
+  scraper:
+    name: Data scraping (tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The adapter itself has no dependencies beyond the standard library and curl;
+      # pytest is only needed to run the tests.
+      - name: Install pytest
+        run: pip install pytest
+
+      # These tests never touch the network: the transformation and the validation are
+      # pure functions, which is the whole reason they are separated from client.py.
+      - name: Test
+        working-directory: DataScraping
+        run: python -m pytest tests -q
+
   docker:
     name: Docker images
     runs-on: ubuntu-latest
