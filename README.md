@@ -4,8 +4,6 @@
 
 > A full-stack web application that provides real-time statistics and insights for the Portuguese First League (Liga Portugal). Built with **Spring Boot**, **React**, and **PostgreSQL**.
 
-[![Demo](https://img.shields.io/badge/WEBSITE-VISIT_APP-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://liga-portugal-zone.vercel.app/)
-
 [![CI](https://github.com/brunobrsr1/LigaPortugalZoneWebsite/actions/workflows/ci.yml/badge.svg)](https://github.com/brunobrsr1/LigaPortugalZoneWebsite/actions/workflows/ci.yml)
 
 ---
